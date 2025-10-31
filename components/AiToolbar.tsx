@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Selection, RephraseSuggestion } from '../types';
-import { ICONS } from '../constants';
+// FIX: Add .ts extension to file import.
+import { Selection, RephraseSuggestion } from '../types.ts';
+// FIX: Add .tsx extension to file import.
+import { ICONS } from '../constants.tsx';
 
 interface AiToolbarProps {
   selection: Selection | null;
@@ -10,6 +12,7 @@ interface AiToolbarProps {
   onCancelRephrase: () => void;
   suggestions: RephraseSuggestion[] | null;
   isLoading: boolean;
+  onIllustrate: () => void;
 }
 
 const ActionButton: React.FC<{ onClick: () => void; disabled: boolean; children: React.ReactNode }> = ({ onClick, disabled, children }) => (
@@ -22,7 +25,7 @@ const ActionButton: React.FC<{ onClick: () => void; disabled: boolean; children:
     </button>
 );
 
-export const AiToolbar: React.FC<AiToolbarProps> = ({ selection, onIterate, onRephrase, onReplace, onCancelRephrase, suggestions, isLoading }) => {
+export const AiToolbar: React.FC<AiToolbarProps> = ({ selection, onIterate, onRephrase, onReplace, onCancelRephrase, suggestions, isLoading, onIllustrate }) => {
   const [customInstruction, setCustomInstruction] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [showToneOptions, setShowToneOptions] = useState(false);
@@ -102,6 +105,10 @@ export const AiToolbar: React.FC<AiToolbarProps> = ({ selection, onIterate, onRe
                     <ActionButton disabled={!isSelectionActive} onClick={() => onIterate('Make it more concise.')}>Shorten</ActionButton>
                     <ActionButton disabled={!isSelectionActive} onClick={() => onIterate('Expand on this idea.')}>Expand</ActionButton>
                     <ActionButton disabled={!isSelectionActive} onClick={onRephrase}>Rephrase</ActionButton>
+                    <ActionButton disabled={!isSelectionActive} onClick={onIllustrate}>
+                        {ICONS.illustrate}
+                        Illustrate
+                    </ActionButton>
                     <ActionButton disabled={!isSelectionActive} onClick={() => setShowToneOptions(true)}>
                         {ICONS.tone}
                         Tone

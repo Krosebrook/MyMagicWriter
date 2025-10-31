@@ -1,4 +1,3 @@
-
 export interface GenerativePart {
     inlineData?: {
         data: string; // base64 encoded
@@ -33,4 +32,9 @@ export interface SpellcheckError {
     word: string;
     suggestions: string[];
     index: number;
+}
+
+export interface Illustration {
+  prompt: string;
+  imageUrl: string;
 }

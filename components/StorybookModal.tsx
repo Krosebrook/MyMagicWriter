@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { StorybookPage } from '../types';
-import * as geminiService from '../services/geminiService';
+// FIX: Add .ts extension to file import.
+import { StorybookPage } from '../types.ts';
+// FIX: Add .ts extension to file import.
+import * as geminiService from '../services/geminiService.ts';
 
 interface StorybookModalProps {
   isOpen: boolean;
@@ -67,7 +69,7 @@ export const StorybookModal: React.FC<StorybookModalProps> = ({ isOpen, onClose,
         <div className="flex justify-between items-center mb-4 flex-shrink-0">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Storybook</h2>
           <button onClick={onClose} className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-6 h-6"><path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-6 h-6"><path d="M6.28 5.22a.75.T75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" /></svg>
           </button>
         </div>
 
@@ -80,7 +82,7 @@ export const StorybookModal: React.FC<StorybookModalProps> = ({ isOpen, onClose,
             </div>
           )}
           {!isLoading && pages.length > 0 && currentPage && (
-            <div className="w-full h-full flex flex-col p-4 animate-fade-in">
+            <div key={currentPageIndex} className="w-full h-full flex flex-col p-4 animate-fade-in">
               <div className="flex-grow w-full bg-black rounded-md flex items-center justify-center mb-4">
                 {currentPage.imageUrl ? (
                   <img src={currentPage.imageUrl} alt="Storybook illustration" className="max-w-full max-h-full object-contain" />

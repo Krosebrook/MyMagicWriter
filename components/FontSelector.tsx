@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ICONS, FONT_FAMILIES, FONT_SIZES } from '../constants';
+// FIX: Add .tsx extension to file import.
+import { ICONS, FONT_FAMILIES, FONT_SIZES } from '../constants.tsx';
 
 interface FontSelectorProps {
   fontFamily: string;

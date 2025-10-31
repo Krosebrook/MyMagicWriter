@@ -1,13 +1,15 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { SYSTEM_INSTRUCTION } from '../constants';
-import { GenerativePart, Suggestion, RephraseSuggestion } from '../types';
+// FIX: Add .tsx extension to file import.
+import { SYSTEM_INSTRUCTION } from '../constants.tsx';
+// FIX: Add .ts extension to file import.
+import { GenerativePart, Suggestion, RephraseSuggestion } from '../types.ts';
 
 if (!process.env.API_KEY) {
   console.warn("API key not found. Please set the process.env.API_KEY environment variable.");
 }
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
-export const generateInitialDraft = async (prompt: string, files: GenerativePart[]): Promise<string> => {
+export const generateInitialDraft = async (prompt: string, files: GenerativePart[], systemInstruction: string): Promise<string> => {
   try {
     // FIX: Use gemini-2.5-pro for complex text tasks.
     const model = 'gemini-2.5-pro';
@@ -22,7 +24,7 @@ export const generateInitialDraft = async (prompt: string, files: GenerativePart
       model: model,
       contents: { parts: contentParts },
       config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
+        systemInstruction: systemInstruction || SYSTEM_INSTRUCTION,
       }
     });
 
@@ -33,7 +35,7 @@ export const generateInitialDraft = async (prompt: string, files: GenerativePart
   }
 };
 
-export const iterateOnSelection = async (selection: string, instruction: string): Promise<string> => {
+export const iterateOnSelection = async (selection: string, instruction: string, systemInstruction: string): Promise<string> => {
   try {
     const model = 'gemini-flash-latest';
     const fullPrompt = `Here is a piece of text:\n\n---\n${selection}\n---\n\nPlease apply the following instruction to it: "${instruction}". Remember to only return the modified text.`;
@@ -42,7 +44,7 @@ export const iterateOnSelection = async (selection: string, instruction: string)
       model: model,
       contents: fullPrompt,
       config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
+        systemInstruction: systemInstruction || SYSTEM_INSTRUCTION,
       }
     });
 
@@ -190,7 +192,7 @@ export const generateStorybookImage = async (paragraph: string): Promise<string 
   }
 };
 
-export const generateForInsertion = async (prompt: string): Promise<string> => {
+export const generateForInsertion = async (prompt: string, systemInstruction: string): Promise<string> => {
   try {
     // FIX: Use gemini-2.5-pro for complex text tasks.
     const model = 'gemini-2.5-pro';
@@ -200,7 +202,7 @@ export const generateForInsertion = async (prompt: string): Promise<string> => {
       model: model,
       contents: fullPrompt,
       config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
+        systemInstruction: systemInstruction || SYSTEM_INSTRUCTION,
       }
     });
 
@@ -208,5 +210,40 @@ export const generateForInsertion = async (prompt: string): Promise<string> => {
   } catch (error) {
     console.error("Error generating for insertion:", error);
     return `\n---\nSorry, I couldn't generate the content. Please try again.\n---\n`;
+  }
+};
+
+export const generateNextSteps = async (documentContent: string, systemInstruction: string): Promise<string[]> => {
+  if (!documentContent.trim()) {
+    return ["Start by writing an introduction.", "Create an outline for your main points.", "Define the main character."];
+  }
+  try {
+    const model = 'gemini-flash-latest';
+    const prompt = `Based on the following document content, please generate a list of 15 actionable steps the author could take to continue, improve, or complete this piece of writing. The steps should be clear, concise, and helpful. Return a JSON array of strings.
+
+Document:
+---
+${documentContent}
+---`;
+
+    const response = await ai.models.generateContent({
+      model: model,
+      contents: prompt,
+      config: {
+        systemInstruction: systemInstruction || SYSTEM_INSTRUCTION,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.ARRAY,
+          items: { type: Type.STRING }
+        }
+      }
+    });
+    const jsonString = response.text.trim();
+    if (!jsonString) return [];
+
+    return JSON.parse(jsonString) as string[];
+  } catch (error) {
+    console.error("Error generating next steps:", error);
+    return ["An error occurred while generating next steps. Please try again."];
   }
 };

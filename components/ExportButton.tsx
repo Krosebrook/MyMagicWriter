@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ICONS } from '../constants';
+// FIX: Add .tsx extension to file import.
+import { ICONS } from '../constants.tsx';
 
 // Since jsPDF is loaded from a script tag, we need to tell TypeScript about it.
 declare global {

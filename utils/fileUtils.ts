@@ -1,5 +1,6 @@
 
-import { GenerativePart } from '../types';
+// FIX: Add .ts extension to file import.
+import { GenerativePart } from '../types.ts';
 
 export const fileToGenerativePart = async (file: File): Promise<GenerativePart> => {
   const base64EncodedDataPromise = new Promise<string>((resolve, reject) => {
