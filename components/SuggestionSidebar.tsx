@@ -4,62 +4,61 @@ import { Suggestion } from '../types';
 import { ICONS } from '../constants';
 
 interface SuggestionSidebarProps {
-    suggestion: Suggestion | null;
-    onAccept: () => void;
-    onDismiss: () => void;
-    isChecking: boolean;
+  suggestion: Suggestion | null;
+  onAccept: (suggestion: Suggestion) => void;
+  onDismiss: () => void;
+  isLoading: boolean;
 }
 
-export const SuggestionSidebar: React.FC<SuggestionSidebarProps> = ({ suggestion, onAccept, onDismiss, isChecking }) => {
+export const SuggestionSidebar: React.FC<SuggestionSidebarProps> = ({ suggestion, onAccept, onDismiss, isLoading }) => {
+  if (!suggestion) {
     return (
-        <div className="w-full h-full bg-gray-900 border-l border-gray-700/50 p-6 flex flex-col">
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        <div className="w-64 bg-gray-50 dark:bg-gray-900/50 border-l border-gray-200 dark:border-gray-800 p-4 flex flex-col justify-center items-center text-center transition-all duration-300">
+            <div className="w-10 h-10 text-gray-400 dark:text-gray-600">
                 {ICONS.lightbulb}
-                AI Suggestions
-            </h2>
-            <div className="flex-grow bg-gray-800 rounded-lg p-4 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                {isChecking && (
-                    <div className="flex flex-col items-center justify-center text-gray-400">
-                        <div className="w-6 h-6 border-2 border-gray-500 border-t-purple-500 rounded-full animate-spin mb-3"></div>
-                        <span>Analyzing your text...</span>
-                    </div>
-                )}
-
-                {!isChecking && suggestion && (
-                    <div className="w-full h-full flex flex-col text-left animate-fade-in">
-                        <p className="text-sm text-purple-400 font-semibold mb-2">{suggestion.reason}</p>
-                        
-                        <div className="mb-4">
-                            <p className="text-xs text-gray-500 mb-1 uppercase font-bold">Original</p>
-                            <p className="bg-red-900/20 text-red-300 p-2 rounded-md text-sm line-through decoration-red-400">{suggestion.snippet}</p>
-                        </div>
-                        
-                        <div>
-                             <p className="text-xs text-gray-500 mb-1 uppercase font-bold">Suggestion</p>
-                            <p className="bg-green-900/20 text-green-300 p-2 rounded-md text-sm">{suggestion.suggestion}</p>
-                        </div>
-
-                        <div className="mt-auto flex gap-3">
-                            <button onClick={onAccept} className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition">Accept</button>
-                            <button onClick={onDismiss} className="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition">Dismiss</button>
-                        </div>
-                    </div>
-                )}
-                
-                {!isChecking && !suggestion && (
-                     <div className="text-gray-500 flex flex-col items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 mb-2">
-                           <path strokeLinecap="round" strokeLinejoin="round" d="m9 12.75 3 3m0 0 3-3m-3 3v-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                        </svg>
-                        <p>Suggestions will appear here as you write.</p>
-                     </div>
-                )}
             </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                {isLoading ? "Thinking..." : "Proactive suggestions will appear here as you write."}
+            </p>
         </div>
     );
-}
+  }
 
-// Add fade-in animation to tailwind config or a style tag if needed
-// For simplicity here, we'll rely on a basic effect.
-// In index.html, you can add:
-// <style> @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } } .animate-fade-in { animation: fade-in 0.5s ease-in-out; } </style>
+  return (
+    <div className="w-64 bg-gray-50 dark:bg-gray-900/50 border-l border-gray-200 dark:border-gray-800 p-4 flex flex-col gap-4 animate-fade-in">
+      <div>
+        <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+          {ICONS.sparkle}
+          Suggestion
+        </h3>
+        <p className="text-xs text-gray-600 dark:text-gray-400">{suggestion.reason}</p>
+      </div>
+      
+      <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 space-y-2 text-sm">
+        <div>
+          <span className="text-xs font-semibold text-red-500 uppercase">From</span>
+          <p className="line-through text-gray-500 dark:text-gray-400">{suggestion.snippet}</p>
+        </div>
+        <div>
+          <span className="text-xs font-semibold text-green-500 uppercase">To</span>
+          <p className="text-gray-900 dark:text-white">{suggestion.suggestion}</p>
+        </div>
+      </div>
+
+      <div className="mt-auto flex flex-col gap-2">
+        <button
+          onClick={() => onAccept(suggestion)}
+          className="w-full px-4 py-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition duration-200"
+        >
+          Accept
+        </button>
+        <button
+          onClick={onDismiss}
+          className="w-full px-4 py-2 text-sm font-semibold text-gray-800 dark:text-white bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg transition duration-200"
+        >
+          Dismiss
+        </button>
+      </div>
+    </div>
+  );
+};

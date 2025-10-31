@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { fileToGenerativePart } from '../utils/fileUtils';
 import { GenerativePart } from '../types';
 import { ICONS } from '../constants';
+import * as geminiService from '../services/geminiService';
 
 interface InitialPromptModalProps {
   isOpen: boolean;
@@ -14,6 +14,8 @@ interface InitialPromptModalProps {
 export const InitialPromptModal: React.FC<InitialPromptModalProps> = ({ isOpen, onClose, onGenerate, isLoading }) => {
   const [prompt, setPrompt] = useState('');
   const [files, setFiles] = useState<File[]>([]);
+  const [suggestedPrompts, setSuggestedPrompts] = useState<string[]>([]);
+  const [isSuggesting, setIsSuggesting] = useState<boolean>(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -27,35 +29,75 @@ export const InitialPromptModal: React.FC<InitialPromptModalProps> = ({ isOpen, 
     onGenerate(prompt, fileParts);
   };
 
+  const handleSuggestPrompts = async () => {
+    setIsSuggesting(true);
+    setSuggestedPrompts([]);
+    const prompts = await geminiService.getCreativePrompts();
+    setSuggestedPrompts(prompts);
+    setIsSuggesting(false);
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 transition-opacity duration-300">
-      <div className="bg-gray-800 rounded-xl shadow-2xl p-8 w-full max-w-2xl transform transition-all duration-300 scale-100">
-        <h2 className="text-3xl font-bold text-white mb-4">Create something new</h2>
-        <p className="text-gray-400 mb-6">Describe what you want to write. You can also upload files for context (e.g., meeting notes, a rough draft).</p>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 w-full max-w-2xl transform transition-all duration-300 scale-100">
+        <div className="flex justify-between items-center mb-4">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Create something new</h2>
+            <button
+                onClick={handleSuggestPrompts}
+                disabled={isSuggesting || isLoading}
+                className="px-4 py-2 text-sm font-semibold text-purple-600 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/50 hover:bg-purple-200 dark:hover:bg-purple-900 rounded-lg transition duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait"
+            >
+                {isSuggesting ? (
+                     <div className="w-4 h-4 border-2 border-purple-600 dark:border-purple-300 border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                    ICONS.lightbulb
+                )}
+                Suggest prompts
+            </button>
+        </div>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">Describe what you want to write. You can also upload files for context (e.g., meeting notes, a rough draft).</p>
+        
+        {isSuggesting && !suggestedPrompts.length && (
+            <div className="mb-4 text-center text-sm text-gray-500 dark:text-gray-400">Thinking of some ideas...</div>
+        )}
+
+        {suggestedPrompts.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+                {suggestedPrompts.map((p, i) => (
+                    <button
+                        key={i}
+                        onClick={() => setPrompt(p)}
+                        className="px-3 py-1 bg-gray-200 dark:bg-gray-700 hover:bg-purple-600 hover:text-white dark:text-gray-200 rounded-full transition"
+                    >
+                        {p}
+                    </button>
+                ))}
+            </div>
+        )}
         
         <div className="space-y-4">
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="A blog post about the future of remote work..."
-            className="w-full h-32 p-4 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition text-white placeholder-gray-500"
+            className="w-full h-32 p-4 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-500"
             disabled={isLoading}
           />
 
           <div>
-            <label htmlFor="file-upload" className="block text-sm font-medium text-gray-300 mb-2">Attach files (optional)</label>
+            <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Attach files (optional)</label>
             <input 
               id="file-upload"
               type="file" 
               multiple 
               onChange={handleFileChange} 
-              className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 disabled:opacity-50"
+              className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-600 file:text-white hover:file:bg-purple-700 disabled:opacity-50"
               disabled={isLoading}
             />
             {files.length > 0 && (
-              <div className="mt-2 text-xs text-gray-400">
+              <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 Selected: {files.map(f => f.name).join(', ')}
               </div>
             )}
@@ -66,7 +108,7 @@ export const InitialPromptModal: React.FC<InitialPromptModalProps> = ({ isOpen, 
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="px-6 py-2 rounded-lg text-white bg-gray-700 hover:bg-gray-600 transition disabled:opacity-50"
+            className="px-6 py-2 rounded-lg text-gray-800 dark:text-white bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition disabled:opacity-50"
           >
             Cancel
           </button>
